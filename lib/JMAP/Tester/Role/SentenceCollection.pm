@@ -331,4 +331,12 @@ sub as_stripped_pairs {
   return $self->strip_json_types($self->as_pairs);
 }
 
+sub as_xml {
+  my $inner = join qq{\n}, map {; $_->as_xml } $_[0]->sentences;
+  $inner =~ s/^/  /gms;
+
+  return sprintf "<methodResponses>\n%s</methodResponses>", $inner;
+}
+
+
 1;

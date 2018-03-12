@@ -25,14 +25,16 @@ subtest "the basic basics" => sub {
     sentence_broker => $broker,
     items => [
       [ jstr('atePies'),
-        { howMany => jnum(100), tastiestPieId => jstr(123) },
+        { howMany => jnum(100), tastiestPieId => jstr(123),
+          gotSick => jtrue(), },
         jstr('a') ],
       [ jstr('platesDiscarded'),
         { notDiscarded => [] },
         jstr('a') ],
 
       [ jstr('drankBeer'),
-        { abv => jnum(0.02) },
+        { abv => jnum(0.02), balance => { hops => jnum(1.2), malts => [
+          jnum(1.2), jstr('bitter') ] } },
         jstr('b') ],
 
       [ jstr('tookNap'),
@@ -43,6 +45,8 @@ subtest "the basic basics" => sub {
         jstr('c') ],
     ],
   });
+
+print $res->as_xml;
 
   for my $pair (
     [ response  => sub { my $meth = shift; $res->$meth->[0] } ],

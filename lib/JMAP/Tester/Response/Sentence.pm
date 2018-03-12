@@ -113,4 +113,49 @@ sub assert_named {
   );
 }
 
+sub xml_dump {
+  my ($thing) = @_;
+
+  use Scalar::Util qw(blessed);
+
+  return sprintf "<string>%s</string>", $thing
+    if ! ref $thing or blessed $thing && $thing->isa('JSON::Typist::String');
+
+  return sprintf "<number>%s</number>", $thing
+    if ! ref $thing or blessed $thing && $thing->isa('JSON::Typist::Number');
+
+  return ($thing ? '<true />' : '<false />')
+    if blessed $thing && $thing->isa('Test::Deep::JType::jbool');
+
+  if (ref $thing eq 'ARRAY') {
+    return sprintf "<array>%s</array>", join q{}, map {; xml_dump($_) } @$thing;
+  }
+
+  if (ref $thing eq 'HASH') {
+    return sprintf "<object>%s</object>",
+      join q{}, map {; sprintf qq{<pair name="%s">%s</pair>},
+        $_, xml_dump($thing->{$_}) } keys %$thing;
+  }
+
+  return '...'
+}
+
+sub as_xml {
+  my ($self) = @_;
+  my $xml = sprintf q{<%s cid="%s">}, $self->name, $self->client_id;
+
+  my $inner = "\n";
+  for my $arg (keys %{ $self->arguments }) {
+    $inner .= sprintf qq{<pair name="%s">%s</pair>\n},
+      $arg,
+      xml_dump($self->arguments->{$arg});
+  }
+
+  $inner =~ s/^/  /gsm;
+
+  $xml .= sprintf "%s</%s>", $inner, $self->name;
+
+  return $xml;
+}
+
 1;
